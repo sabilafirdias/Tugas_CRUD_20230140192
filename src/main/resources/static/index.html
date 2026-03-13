@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CRUD KTP</title>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+</head>
+<body>
+
+<h2>Form KTP</h2>
+
+<input type="hidden" id="id">
+
+Nomor KTP
+<input type="text" id="nomorKtp"><br>
+
+Nama
+<input type="text" id="nama"><br>
+
+Alamat
+<input type="text" id="alamat"><br>
+
+Tanggal Lahir
+<input type="date" id="tanggal"><br>
+
+Jenis Kelamin
+<select id="jk">
+    <option value="Laki-laki">Laki-laki</option>
+    <option value="Perempuan">Perempuan</option>
+</select>
+
+<br><br>
+
+<button onclick="simpan()">Simpan</button>
+
+<h2>Data KTP</h2>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>No KTP</th>
+        <th>Nama</th>
+        <th>Aksi</th>
+    </tr>
+    </thead>
+
+    <tbody id="data"></tbody>
+
+</table>
+
+<script src="script.js"></script>
+
+</body>
+</html>
