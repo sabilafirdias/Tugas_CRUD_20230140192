@@ -1,56 +1,492 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>CRUD KTP</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data KTP</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <style>
+        /* ===== RESET & BASE ===== */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #ffffff;
+            padding: 30px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        /* ===== CARD ===== */
+        .card {
+            background: #ffffff;
+            border: 1px solid #e5e5e5;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* ===== FORM ===== */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+            color: #444;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            background: #fff;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        input.error {
+            border-color: #dc3545;
+            background-color: #fff5f5;
+        }
+
+        .hint {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 3px;
+        }
+
+        .char-count {
+            font-size: 0.75rem;
+            color: #999;
+            text-align: right;
+            margin-top: 3px;
+        }
+
+        .char-count.warning { color: #ffc107; }
+        .char-count.success { color: #28a745; }
+
+        /* ===== BUTTONS ===== */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            padding: 9px 18px;
+            font-size: 0.9rem;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            background: #ffffff;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            background: #f5f5f5;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-refresh {
+            background: #007bff;
+            color: white;
+            border: none;
+            margin-bottom: 15px;
+        }
+
+        .btn-refresh:hover {
+            background: #0056b3;
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            color: #212529;
+            border: none;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+
+        .btn-edit:hover {
+            background: #e0a800;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        /* ===== MESSAGE NOTIFICATION ===== */
+        #message {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            display: none;
+            border-left: 4px solid #ccc;
+        }
+
+        #message.success {
+            background: #d4edda;
+            color: #155724;
+            border-left-color: #28a745;
+        }
+
+        #message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+
+        /* ===== TABLE ===== */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 2px solid #eee;
+            font-weight: 600;
+            background: #f8f9fa;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 25px;
+            color: #888;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .card { padding: 20px; }
+            .btn-group { flex-direction: column; }
+            button { width: 100%; }
+            th, td { padding: 10px 8px; font-size: 0.85rem; }
+        }
+    </style>
 </head>
 <body>
 
-<h2>Form KTP</h2>
+<div class="container">
+    <!-- ===== FORM CARD ===== -->
+    <div class="card">
+        <h2>Form Data KTP</h2>
+        <div id="message"></div>
 
-<input type="hidden" id="id">
+        <form id="ktpForm" novalidate>
+            <input type="hidden" id="ktpId">
 
-Nomor KTP
-<input type="text" id="nomorKtp"><br>
+            <!-- Nomor KTP -->
+            <div class="form-group">
+                <label for="nomorKtp">Nomor KTP *</label>
+                <input type="text" id="nomorKtp" maxlength="16" placeholder="16 digit angka" required>
+                <div class="char-count" id="ktpCount">0/16</div>
+            </div>
 
-Nama
-<input type="text" id="nama"><br>
+            <!-- Nama Lengkap -->
+            <div class="form-group">
+                <label for="namaLengkap">Nama Lengkap *</label>
+                <input type="text" id="namaLengkap" placeholder="Hanya huruf dan spasi" required>
+            </div>
 
-Alamat
-<input type="text" id="alamat"><br>
+            <!-- Alamat -->
+            <div class="form-group">
+                <label for="alamat">Alamat *</label>
+                <input type="text" id="alamat" required>
+            </div>
 
-Tanggal Lahir
-<input type="date" id="tanggal"><br>
+            <!-- Tanggal Lahir (format date) -->
+            <div class="form-group">
+                <label for="tanggalLahir">Tanggal Lahir *</label>
+                <input type="date" id="tanggalLahir" required>
+            </div>
 
-Jenis Kelamin
-<select id="jk">
-    <option value="Laki-laki">Laki-laki</option>
-    <option value="Perempuan">Perempuan</option>
-</select>
+            <!-- Jenis Kelamin (dropdown) -->
+            <div class="form-group">
+                <label for="jenisKelamin">Jenis Kelamin *</label>
+                <select id="jenisKelamin" required>
+                    <option value="">-- Pilih --</option>
+                    <option value="Laki-laki">Laki-laki</option>
+                    <option value="Perempuan">Perempuan</option>
+                </select>
+            </div>
 
-<br><br>
+            <!-- Tombol Aksi -->
+            <div class="btn-group">
+                <button type="submit" id="btnSubmit">Simpan</button>
+            </div>
+        </form>
+    </div>
 
-<button onclick="simpan()">Simpan</button>
+    <!-- ===== TABLE CARD ===== -->
+    <div class="card">
+        <h2>Daftar Data KTP</h2>
 
-<h2>Data KTP</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>No KTP</th>
+                    <th>Nama</th>
+                    <th>Alamat</th>
+                    <th>Tgl Lahir</th>
+                    <th>JK</th>
+                    <th>Aksi</th>
+                </tr>
+                </thead>
+                <tbody id="ktpTableBody">
+                <tr><td colspan="7" class="empty-state">Belum ada data</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-<table border="1">
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>No KTP</th>
-        <th>Nama</th>
-        <th>Aksi</th>
-    </tr>
-    </thead>
+<script>
+    const API_URL = "http://localhost:8080/api/ktp";
 
-    <tbody id="data"></tbody>
+    $(document).ready(function () {
+        loadData();
+    });
 
-</table>
 
-<script src="script.js"></script>
+    // ================== CREATE / UPDATE ==================
+    $("#ktpForm").submit(function (e) {
+        e.preventDefault();
+
+        const id = $("#ktpId").val();
+
+        const data = {
+            nomorKtp: $("#nomorKtp").val(),
+            namaLengkap: $("#namaLengkap").val(),
+            alamat: $("#alamat").val(),
+            tanggalLahir: $("#tanggalLahir").val(),
+            jenisKelamin: $("#jenisKelamin").val()
+        };
+
+        let method = "POST";
+        let url = API_URL;
+
+        if (id) {
+            method = "PUT";
+            url = API_URL + "/" + id;
+        }
+
+        $.ajax({
+            url: url,
+            type: method,
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: function () {
+                showMessage("Data berhasil disimpan", "success");
+                resetForm();
+                loadData();
+            },
+            error: function () {
+                showMessage("Terjadi kesalahan saat menyimpan data", "error");
+            }
+        });
+    });
+
+
+    // ================== GET DATA ==================
+    function loadData() {
+        $.ajax({
+            url: API_URL,
+            type: "GET",
+            success: function (response) {
+
+                let data = response.data;
+                let rows = "";
+
+                if (!data || data.length === 0) {
+                    rows = `<tr><td colspan="7">Belum ada data</td></tr>`;
+                } else {
+
+                    $.each(data, function (i, ktp) {
+
+                        rows += `
+                        <tr>
+                            <td>${ktp.id}</td>
+                            <td>${ktp.nomorKtp}</td>
+                            <td>${ktp.namaLengkap}</td>
+                            <td>${ktp.alamat}</td>
+                            <td>${ktp.tanggalLahir}</td>
+                            <td>${ktp.jenisKelamin}</td>
+                            <td>
+                                <button class="btn-edit" onclick="editData(${ktp.id})">Edit</button>
+                                <button class="btn-delete" onclick="deleteData(${ktp.id})">Hapus</button>
+                            </td>
+                        </tr>
+                        `;
+                    });
+
+                }
+
+                $("#ktpTableBody").html(rows);
+            },
+            error: function () {
+                showMessage("Gagal mengambil data dari server", "error");
+            }
+        });
+    }
+
+
+    // ================== GET BY ID ==================
+    function editData(id) {
+
+        $.ajax({
+            url: API_URL + "/" + id,
+            type: "GET",
+            success: function (response) {
+
+                let ktp = response.data;
+
+                $("#ktpId").val(ktp.id);
+                $("#nomorKtp").val(ktp.nomorKtp);
+                $("#namaLengkap").val(ktp.namaLengkap);
+                $("#alamat").val(ktp.alamat);
+                $("#tanggalLahir").val(ktp.tanggalLahir);
+                $("#jenisKelamin").val(ktp.jenisKelamin);
+
+                $("#btnSubmit").text("Update");
+
+                window.scrollTo(0,0);
+            },
+            error: function () {
+                showMessage("Data tidak ditemukan", "error");
+            }
+        });
+
+    }
+
+
+    // ================== DELETE ==================
+    function deleteData(id) {
+
+    Swal.fire({
+        title: "Hapus Data?",
+        text: "Data KTP yang dihapus tidak dapat dikembalikan.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Ya, Hapus",
+        cancelButtonText: "Batal",
+        confirmButtonColor: "#dc3545"
+    }).then((result) => {
+
+        if (result.isConfirmed) {
+
+            $.ajax({
+                url: API_URL + "/" + id,
+                type: "DELETE",
+                success: function () {
+
+                    Swal.fire(
+                        "Berhasil!",
+                        "Data KTP berhasil dihapus.",
+                        "success"
+                    );
+                    loadData();
+                },
+                error: function () {
+                    Swal.fire(
+                        "Gagal!",
+                        "Terjadi kesalahan saat menghapus data.",
+                        "error"
+                    );
+                }
+                });
+            }
+        });
+    }
+
+
+    // ================== RESET FORM ==================
+    function resetForm() {
+
+        $("#ktpForm")[0].reset();
+        $("#ktpId").val("");
+        $("#btnSubmit").text("Simpan");
+
+    }
+
+
+    // ================== NOTIFICATION ==================
+    function showMessage(msg, type) {
+
+        let box = $("#message");
+
+        box.removeClass("success error");
+
+        if (type === "success") {
+            box.addClass("success");
+        } else {
+            box.addClass("error");
+        }
+
+        box.text(msg);
+        box.show();
+
+        setTimeout(function () {
+            box.fadeOut();
+        }, 3000);
+    }
+
+</script>
 
 </body>
 </html>
