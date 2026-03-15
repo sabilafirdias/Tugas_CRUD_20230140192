@@ -67,11 +67,27 @@ public class KtpController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Map<String, Object>> getKtpById(@PathVariable("id") Integer id) {
-        KtpDto result = ktpService.getKtpById(id);
-        return ResponseEntity.status(HttpStatus.OK).body(Map.of(
-                "status", "success",
-                "data", result
-        ));
+        try {
+            KtpDto result = ktpService.getKtpById(id);
+
+            // Cek jika data null
+            if (result == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                        "status", "error",
+                        "message", "Data KTP dengan ID " + id + " tidak ditemukan"
+                ));
+            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(Map.of(
+                    "status", "success",
+                    "data", result
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                    "status", "error",
+                    "message", "Terjadi kesalahan: " + e.getMessage()
+            ));
+        }
     }
 
     @PutMapping(
@@ -86,6 +102,7 @@ public class KtpController {
         KtpDto result = ktpService.updateKtp(id, request);
         return ResponseEntity.status(HttpStatus.OK).body(Map.of(
                 "status", "success",
+                "message", "Data berhasil diperbarui",
                 "data", result
         ));
     }
